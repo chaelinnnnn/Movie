@@ -327,17 +327,16 @@ function renderLegend() {
 
 function renderArcBar(film) {
   const result = PRELOADED[film.id];
-  // Sort by start position ascending, then by width descending (wider = render first, narrower on top)
   const presentStages = STAGES.filter(s => result.stages[s] && result.stages[s].present);
-  const sorted = [...presentStages].sort((a, b) => {
+  // Sort widest first, assign ascending z-index so narrower bars sit on top
+  const sortedByWidth = [...presentStages].sort((a, b) => {
     const sa = result.stages[a], sb = result.stages[b];
-    if (sa.start !== sb.start) return sa.start - sb.start;
-    return (sb.end - sb.start) - (sa.end - sa.start); // wider renders first (behind)
+    return (sb.end - sb.start) - (sa.end - sa.start);
   });
-  const stageBars = sorted.map(stage => {
+  const stageBars = sortedByWidth.map((stage, i) => {
     const s = result.stages[stage];
     const opacity = 0.75 + s.intensity * 0.025;
-    return `<div title="${STAGE_LABELS[stage]}: ${s.note}" style="position:absolute;left:${s.start}%;width:${Math.max(s.end - s.start, 3)}%;height:100%;background:${STAGE_COLORS[stage]};opacity:${opacity}"></div>`;
+    return `<div title="${STAGE_LABELS[stage]}: ${s.note}" style="position:absolute;left:${s.start}%;width:${Math.max(s.end - s.start, 3)}%;height:100%;background:${STAGE_COLORS[stage]};opacity:${opacity};z-index:${i + 1}"></div>`;
   }).join('');
 
   return `
