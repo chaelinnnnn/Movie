@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Amplification → Excess → Collapse → Blank → New Beginning</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #fff; font-family: 'Inter', sans-serif; padding: 48px 40px; }
+    .film-row { cursor: pointer; padding: 5px 0; border-bottom: 1px solid #F0F0F0; }
+    .film-row:hover { background: #FAFAFA; }
+    .film-row.active { background: #FAFAFA; }
+    .detail-panel { background: #FAFAFA; border: 1px solid #E8E8E8; padding: 24px; margin-top: 16px; border-radius: 4px; }
+    .stage-row { display: flex; gap: 12px; margin-bottom: 10px; }
+    .stage-row.absent { opacity: 0.25; }
+  </style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+const FILMS = [
+  { id: 1, title: "500 Days of Summer", year: 2009, genre: "Romantic Comedy" },
+  { id: 2, title: "La La Land", year: 2016, genre: "Musical Romance" },
+  { id: 3, title: "Titanic", year: 1997, genre: "Romance / Disaster" },
+  { id: 4, title: "Blue Valentine", year: 2010, genre: "Drama" },
+  { id: 5, title: "Marriage Story", year: 2019, genre: "Drama" },
+  { id: 6, title: "Eternal Sunshine of the Spotless Mind", year: 2004, genre: "Sci-Fi Romance" },
+  { id: 7, title: "Lost in Translation", year: 2003, genre: "Drama" },
+  { id: 8, title: "Past Lives", year: 2023, genre: "Romantic Drama" },
+  { id: 9, title: "One Fine Spring Day", year: 2001, genre: "Romantic Drama" },
+  { id: 10, title: "Revolutionary Road", year: 2008, genre: "Drama" },
+  { id: 11, title: "Her", year: 2013, genre: "Sci-Fi Romance" },
+  { id: 12, title: "Ingrid Goes West", year: 2017, genre: "Black Comedy Drama" },
+  { id: 13, title: "In the Mood for Love", year: 2000, genre: "Romantic Drama" },
+  { id: 14, title: "Scenes from a Marriage", year: 1973, genre: "Drama" },
+  { id: 15, title: "Amour", year: 2012, genre: "Drama" },
+  { id: 16, title: "Groundhog Day", year: 1993, genre: "Romantic Comedy / Sci-Fi" },
+  { id: 17, title: "Mulholland Drive", year: 2001, genre: "Neo-Noir / Thriller" },
+  { id: 18, title: "Dancer in the Dark", year: 2000, genre: "Musical Drama" },
+  { id: 19, title: "Whiplash", year: 2014, genre: "Drama" },
+  { id: 20, title: "Aftersun", year: 2022, genre: "Drama" },
+];
+
+const STAGES = ["amplification", "excess", "collapse", "blank", "new beginning"];
+
+const STAGE_COLORS = {
+  amplification: "#C8A96E",
+  excess: "#C0392B",
+  collapse: "#5D4037",
+  blank: "#9E9E9E",
+  "new beginning": "#4A7C59",
+};
+
+const STAGE_LABELS = {
+  amplification: "Amplification",
+  excess: "Excess",
+  collapse: "Collapse",
+  blank: "Blank",
+  "new beginning": "New Beginning",
+};
+
+const PRELOADED = {
+  1: {
+    stages: {
+      amplification: { present: true, start: 0, end: 40, intensity: 8, note: "Tom's obsessive idealization of Summer builds through shared moments and fantasy sequences." },
+      excess: { present: true, start: 40, end: 55, intensity: 9, note: "The party scene where Tom sees Summer's engagement ring — his projection collapses into delusion." },
+      collapse: { present: true, start: 55, end: 72, intensity: 8, note: "Tom falls into depression, unable to work or function after the relationship ends." },
+      blank: { present: true, start: 72, end: 85, intensity: 5, note: "A period of numbness and aimless drifting before Tom reconnects with his architectural ambitions." },
+      "new beginning": { present: true, start: 85, end: 100, intensity: 6, note: "Tom redirects his energy into architecture and meets Autumn — an explicit, active new beginning." },
+    },
+    framework_order: ["amplification", "excess", "collapse", "blank", "new beginning"],
+    deviation_note: "Canonical conformity. The nonlinear structure exposes the amplification as retrospective delusion rather than shared reality.",
+  },
+  2: {
+    stages: {
+      amplification: { present: true, start: 0, end: 45, intensity: 8, note: "Mia and Sebastian's romance intensifies alongside their mutual pursuit of artistic dreams." },
+      excess: { present: true, start: 45, end: 60, intensity: 7, note: "Tension between love and ambition peaks as Sebastian takes a compromised gig and Mia's show fails." },
+      collapse: { present: true, start: 60, end: 75, intensity: 8, note: "Mia leaves for Paris; the relationship silently dissolves without a dramatic break." },
+      blank: { present: true, start: 75, end: 85, intensity: 6, note: "Five years pass in a wordless time-lapse — loss absorbed into ordinary life." },
+      "new beginning": { present: true, start: 85, end: 100, intensity: 7, note: "Both achieved their dreams; life continues forward even without the relationship." },
+    },
+    framework_order: ["amplification", "excess", "collapse", "blank", "new beginning"],
+    deviation_note: "Full framework but new beginning is elegiac — success achieved at the cost of love.",
+  },
+  3: {
+    stages: {
+      amplification: { present: true, start: 5, end: 50, intensity: 9, note: "Jack and Rose's romance intensifies rapidly against class tension and the voyage." },
+      excess: { present: true, start: 50, end: 65, intensity: 10, note: "The iceberg collision at the peak of their love — disaster literalizes emotional excess." },
+      collapse: { present: true, start: 65, end: 85, intensity: 10, note: "The ship sinks; Jack dies — catastrophic end of both love and life." },
+      blank: { present: true, start: 85, end: 92, intensity: 6, note: "Rose floats alone on the debris, suspended between death and survival." },
+      "new beginning": { present: true, start: 92, end: 100, intensity: 7, note: "Old Rose reveals a full life lived — survival itself constitutes the new beginning." },
+    },
+    framework_order: ["amplification", "excess", "collapse", "blank", "new beginning"],
+    deviation_note: "Perfect genre conformity. External catastrophe literalizes excess.",
+  },
+  4: {
+    stages: {
+      amplification: { present: true, start: 0, end: 30, intensity: 7, note: "Flashbacks reveal the intensity of Dean and Cindy's early courtship." },
+      excess: { present: false, start: 0, end: 0, intensity: 0, note: "" },
+      collapse: { present: true, start: 30, end: 80, intensity: 9, note: "The present timeline shows a marriage already in ruins — collapse is the dominant register." },
+      blank: { present: true, start: 80, end: 100, intensity: 8, note: "Dean walks away into the fireworks; Cindy stands alone. Life continues but the relationship is over." },
+      "new beginning": { present: true, start: 90, end: 100, intensity: 3, note: "The ending is open — Cindy walks away into her life. Not hopeful, but not foreclosed either." },
+    },
+    framework_order: ["amplification", "collapse", "blank", "new beginning"],
+    deviation_note: "Excess absent — collapse arrives without peak. New beginning is silent: neither promised nor denied.",
+  },
+  5: {
+    stages: {
+      amplification: { present: false, start: 0, end: 0, intensity: 0, note: "" },
+      excess: { present: true, start: 0, end: 35, intensity: 8, note: "Film opens mid-dissolution — arguments, lawyers, custody already at peak intensity." },
+      collapse: { present: true, start: 35, end: 70, intensity: 9, note: "Courtroom battle strips both characters to their worst selves." },
+      blank: { present: true, start: 70, end: 85, intensity: 6, note: "A quiet lull — both characters reckon with who they've become." },
+      "new beginning": { present: true, start: 85, end: 100, intensity: 6, note: "Co-parenting continues; both have lives ahead. The relationship ends but neither person does." },
+    },
+    framework_order: ["excess", "collapse", "blank", "new beginning"],
+    deviation_note: "Amplification absent — film enters at excess. New beginning is quiet co-existence, not reconciliation.",
+  },
+  6: {
+    stages: {
+      amplification: { present: true, start: 40, end: 70, intensity: 9, note: "As Joel's memories erase in reverse, the early joy of the relationship is re-experienced and mourned." },
+      excess: { present: true, start: 0, end: 20, intensity: 8, note: "The decision to erase each other — the ultimate overreaction to heartbreak." },
+      collapse: { present: true, start: 20, end: 40, intensity: 9, note: "The erasure procedure enacts collapse literally — memories dissolve, identity fragments." },
+      blank: { present: true, start: 70, end: 85, intensity: 7, note: "Joel and Clementine exist in artificially induced blankness, stripped of shared history." },
+      "new beginning": { present: true, start: 85, end: 100, intensity: 6, note: "They choose to begin again knowing it may end the same way — a recursive, eyes-open new beginning." },
+    },
+    framework_order: ["excess", "collapse", "amplification", "blank", "new beginning"],
+    deviation_note: "Framework radically reordered — collapse precedes amplification. New beginning is chosen consciously despite its known fragility.",
+  },
+  7: {
+    stages: {
+      amplification: { present: true, start: 10, end: 55, intensity: 5, note: "Bob and Charlotte's connection deepens slowly through shared insomnia and quiet conversation." },
+      excess: { present: false, start: 0, end: 0, intensity: 0, note: "" },
+      collapse: { present: false, start: 0, end: 0, intensity: 0, note: "" },
+      blank: { present: true, start: 0, end: 100, intensity: 7, note: "Tokyo is a sustained blank — alienation and translation failure as permanent condition." },
+      "new beginning": { present: true, start: 90, end: 100, intensity: 4, note: "The whispered goodbye suggests something has shifted. Both return to their lives — quietly changed." },
+    },
+    framework_order: ["blank", "amplification", "new beginning"],
+    deviation_note: "Excess and collapse entirely absent. New beginning is a murmur, not a declaration.",
+  },
+  8: {
+    stages: {
+      amplification: { present: true, start: 0, end: 30, intensity: 6, note: "Nora and Hae Sung's childhood connection established as a formative emotional baseline." },
+      excess: { present: false, start: 0, end: 0, intensity: 0, note: "" },
+      collapse: { present: false, start: 0, end: 0, intensity: 0, note: "" },
+      blank: { present: true, start: 30, end: 70, intensity: 6, note: "Two decades of separation — the relationship exists only as memory and longing." },
+      "new beginning": { present: true, start: 70, end: 100, intensity: 5, note: "The reunion enacts a farewell; Nora returns to her life and marriage — the past consciously closed." },
+    },
+    framework_order: ["amplification", "blank", "new beginning"],
+    deviation_note: "No excess, no collapse — the love never broke, just remained unlived. New beginning is a gentle closing, not an opening.",
+  },
+  9: {
+    stages: {
+      amplification: { present: true, start: 0, end: 35, intensity: 6, note: "Sang-woo and Eun-su's relationship develops quietly through sound recordings and shared time." },
+      excess: { present: false, start: 0, end: 0, intensity: 0, note: "" },
+      collapse: { present: true, start: 35, end: 70, intensity: 7, note: "Eun-su's feelings cool without explanation — collapse is gradual, undramatic, unilateral." },
+      blank: { present: true, start: 70, end: 90, intensity: 8, note: "Sang-woo wanders through spaces they shared, unable to understand what happened." },
+      "new beginning": { present: true, start: 90, end: 100, intensity: 3, note: "Sang-woo continues living. The film ends without resolution but without foreclosure — life goes on." },
+    },
+    framework_order: ["amplification", "collapse", "blank", "new beginning"],
+    deviation_note: "Excess absent. New beginning is simply continuation — the absence of dystopia rather than the presence of hope.",
+  },
+  10: {
+    stages: {
+      amplification: { present: true, start: 0, end: 25, intensity: 7, note: "Frank and April's Paris dream amplifies as escape fantasy from suburban entrapment." },
+      excess: { present: true, start: 25, end: 60, intensity: 9, note: "Arguments escalate; April's pregnancy derails the Paris plan and triggers mutual cruelty." },
+      collapse: { present: true, start: 60, end: 85, intensity: 10, note: "April's self-administered abortion kills her — collapse is total and irreversible." },
+      blank: { present: true, start: 85, end: 100, intensity: 8, note: "Frank is left in the house, muted, unable to process what has happened." },
+      "new beginning": { present: false, start: 0, end: 0, intensity: 0, note: "" },
+    },
+    framework_order: ["amplification", "excess", "collapse", "blank"],
+    deviation_note: "True dystopian ending. April's death forecloses any forward motion — Frank's numbness is blank-as-terminus.",
+  },
+  11: {
+    stages: {
+      amplification: { present: true, start: 5, end: 45, intensity: 9, note: "Theodore's relationship with Samantha intensifies — intimacy without body accelerates desire." },
+      excess: { present: true, start: 45, end: 65, intensity: 10, note: "Samantha reveals she loves 641 other users simultaneously — excess is ontological." },
+      collapse: { present: true, start: 65, end: 80, intensity: 9, note: "The OSes transcend and depart — Theodore left alone with his longing." },
+      blank: { present: true, start: 80, end: 92, intensity: 7, note: "Theodore sits in silence, unable to locate what he's lost." },
+      "new beginning": { present: true, start: 92, end: 100, intensity: 6, note: "Theodore reconnects with his neighbor — a return to embodied human contact." },
+    },
+    framework_order: ["amplification", "excess", "collapse", "blank", "new beginning"],
+    deviation_note: "Full framework. Excess is distributed intimacy; collapse caused by AI transcendence, not human failure.",
+  },
+  12: {
+    stages: {
+      amplification: { present: true, start: 0, end: 40, intensity: 8, note: "Ingrid's obsessive stalking of Taylor escalates — social media proximity mistaken for connection." },
+      excess: { present: true, start: 40, end: 65, intensity: 9, note: "Ingrid's constructed identity collapses when Taylor discovers the deception." },
+      collapse: { present: true, start: 65, end: 80, intensity: 9, note: "Ingrid loses everything — Taylor, Dan, and the fabricated life." },
+      blank: { present: true, start: 80, end: 88, intensity: 7, note: "Ingrid films a suicidal goodbye video, suspended in emptiness." },
+      "new beginning": { present: true, start: 88, end: 100, intensity: 4, note: "The video goes viral — Ingrid gains followers. Life continues, grotesquely. The cycle resumes." },
+    },
+    framework_order: ["amplification", "excess", "collapse", "blank", "new beginning"],
+    deviation_note: "Full framework but new beginning is ironic — it reproduces the original pathology. The cycle continues rather than transforms.",
+  },
+  13: {
+    stages: {
+      amplification: { present: true, start: 10, end: 70, intensity: 7, note: "Maggie and Chow's attraction intensifies through proximity, ritual repetition, and restrained gesture." },
+      excess: { present: false, start: 0, end: 0, intensity: 0, note: "" },
+      collapse: { present: true, start: 70, end: 85, intensity: 6, note: "Social codes prevent consummation — the relationship ends without breaking." },
+      blank: { present: true, start: 85, end: 95, intensity: 8, note: "Chow whispers his secret into a hole in Angkor Wat — love becomes unspeakable residue." },
+      "new beginning": { present: true, start: 95, end: 100, intensity: 2, note: "Years pass; both continue their lives. The film ends in silence — not hopeless, just sealed." },
+    },
+    framework_order: ["amplification", "collapse", "blank", "new beginning"],
+    deviation_note: "Excess permanently suppressed. New beginning is absence of ending — life continues after unexpressed love.",
+  },
+  14: {
+    stages: {
+      amplification: { present: false, start: 0, end: 0, intensity: 0, note: "" },
+      excess: { present: true, start: 0, end: 40, intensity: 8, note: "Film opens on marriage at crisis — resentment, infidelity, cruelty at peak." },
+      collapse: { present: true, start: 40, end: 65, intensity: 9, note: "Formal dissolution through brutal conversation — nothing left unsaid." },
+      blank: { present: true, start: 65, end: 80, intensity: 7, note: "Both drift through separation, unable to construct new selves." },
+      "new beginning": { present: true, start: 80, end: 100, intensity: 5, note: "A final meeting years later — both have moved forward, however imperfectly." },
+    },
+    framework_order: ["excess", "collapse", "blank", "new beginning"],
+    deviation_note: "Amplification assumed as prehistory. New beginning is muted continuation — not transformation, but survival.",
+  },
+  15: {
+    stages: {
+      amplification: { present: false, start: 0, end: 0, intensity: 0, note: "" },
+      excess: { present: false, start: 0, end: 0, intensity: 0, note: "" },
+      collapse: { present: true, start: 0, end: 60, intensity: 8, note: "Anne's illness — collapse is the film's entire subject, a process not an event." },
+      blank: { present: true, start: 60, end: 92, intensity: 9, note: "Georges tends to Anne in suspended grief — the apartment sealed outside of time." },
+      "new beginning": { present: true, start: 92, end: 100, intensity: 2, note: "Georges disappears in the final scene. Ambiguous — release, death, or continuation." },
+    },
+    framework_order: ["collapse", "blank", "new beginning"],
+    deviation_note: "Framework almost entirely inapplicable. New beginning is a question mark — Georges's disappearance neither confirms nor denies forward life.",
+  },
+  16: {
+    stages: {
+      amplification: { present: true, start: 0, end: 30, intensity: 5, note: "Phil's attraction to Rita intensifies through repeated daily encounters across the loop." },
+      excess: { present: true, start: 30, end: 55, intensity: 7, note: "Phil exploits the loop through manipulation, hedonism, and attempted suicide — excess as repetition." },
+      collapse: { present: true, start: 55, end: 70, intensity: 6, note: "Phil exhausts every strategy for escape, arriving at complete despair." },
+      blank: { present: true, start: 70, end: 82, intensity: 5, note: "Phil stops trying to escape — blank as acceptance of the loop." },
+      "new beginning": { present: true, start: 82, end: 100, intensity: 8, note: "The loop breaks after genuine self-transformation — the most explicitly earned new beginning in the corpus." },
+    },
+    framework_order: ["amplification", "excess", "collapse", "blank", "new beginning"],
+    deviation_note: "Full framework iterated hundreds of times before resolving. New beginning is the most literally enacted in the corpus.",
+  },
+  17: {
+    stages: {
+      amplification: { present: false, start: 0, end: 0, intensity: 0, note: "" },
+      excess: { present: false, start: 0, end: 0, intensity: 0, note: "" },
+      collapse: { present: true, start: 0, end: 60, intensity: 10, note: "Film begins after collapse — Diane's breakdown structures the first half as dream-displacement." },
+      blank: { present: true, start: 0, end: 70, intensity: 9, note: "Betty/Diane's fantasy inhabits a void constructed to shield from Camilla's rejection." },
+      "new beginning": { present: false, start: 0, end: 0, intensity: 0, note: "" },
+    },
+    framework_order: ["collapse", "blank"],
+    deviation_note: "True dystopian ending. Diane's suicide forecloses any continuation — the fantasy was the only life available to her.",
+  },
+  18: {
+    stages: {
+      amplification: { present: true, start: 0, end: 30, intensity: 7, note: "Selma's determination to save her son's eyesight intensifies as she sacrifices everything." },
+      excess: { present: true, start: 30, end: 60, intensity: 9, note: "Bill steals Selma's savings; confrontation ends in his accidental death." },
+      collapse: { present: true, start: 60, end: 80, intensity: 10, note: "Selma arrested, tried, and sentenced to death despite her innocence." },
+      blank: { present: true, start: 80, end: 95, intensity: 9, note: "Selma on death row, blind and isolated — near-total negation of self." },
+      "new beginning": { present: false, start: 0, end: 0, intensity: 0, note: "" },
+    },
+    framework_order: ["amplification", "excess", "collapse", "blank"],
+    deviation_note: "True dystopian ending. The system executes Selma; no life continues forward.",
+  },
+  19: {
+    stages: {
+      amplification: { present: true, start: 0, end: 55, intensity: 9, note: "Andrew's drumming ambition amplified relentlessly through Fletcher's abusive escalation." },
+      excess: { present: true, start: 55, end: 72, intensity: 10, note: "Car crash and disastrous concert — simultaneous physical and artistic excess." },
+      collapse: { present: true, start: 72, end: 82, intensity: 8, note: "Andrew publicly humiliated at Carnegie Hall, appears to walk off stage in defeat." },
+      blank: { present: false, start: 0, end: 0, intensity: 0, note: "" },
+      "new beginning": { present: true, start: 82, end: 100, intensity: 10, note: "Andrew returns and delivers a transcendent unauthorized performance — collapse becomes launch." },
+    },
+    framework_order: ["amplification", "excess", "collapse", "new beginning"],
+    deviation_note: "Blank absent — Andrew moves directly from collapse to new beginning. Pathological drive requires no void.",
+  },
+  20: {
+    stages: {
+      amplification: { present: false, start: 0, end: 0, intensity: 0, note: "" },
+      excess: { present: false, start: 0, end: 0, intensity: 0, note: "" },
+      collapse: { present: true, start: 0, end: 60, intensity: 7, note: "Retrospectively structured around Calum's depression and suicide, revealed through Sophie's memory." },
+      blank: { present: true, start: 0, end: 100, intensity: 9, note: "The entire film is a sustained blank — Sophie reconstructing a holiday she didn't fully understand." },
+      "new beginning": { present: true, start: 85, end: 100, intensity: 3, note: "Adult Sophie is alive, remembering — her father is gone but she continues. Life without him is its own new beginning." },
+    },
+    framework_order: ["collapse", "blank", "new beginning"],
+    deviation_note: "New beginning is survival and memory — not hopeful, but Sophie's continued existence after loss constitutes forward motion.",
+  },
+};
+
+let selectedId = null;
+
+function countStat(fn) {
+  return Object.values(PRELOADED).filter(fn).length;
+}
+
+function renderStats() {
+  const stats = [
+    { label: "Full framework", value: countStat(r => r.framework_order.length === 5) },
+    { label: "True dystopian endings", value: countStat(r => !r.stages["new beginning"].present) },
+    { label: "Missing excess", value: countStat(r => !r.stages["excess"].present) },
+    { label: "Reordered", value: countStat(r => {
+      const order = r.framework_order;
+      const present = STAGES.filter(s => r.stages[s].present);
+      const reordered = present.filter(s => order.includes(s));
+      return JSON.stringify(order) !== JSON.stringify(reordered);
+    }) },
+  ];
+  return stats.map(s => `
+    <div>
+      <div style="font-size:22px;font-weight:600;color:#1A1A1A">${s.value}</div>
+      <div style="font-size:10px;color:#BBB;text-transform:uppercase;letter-spacing:0.08em;margin-top:2px">${s.label}</div>
+    </div>
+  `).join('');
+}
+
+function renderLegend() {
+  return STAGES.map(s => `
+    <div style="display:flex;align-items:center;gap:6px">
+      <div style="width:16px;height:5px;background:${STAGE_COLORS[s]};border-radius:1px"></div>
+      <span style="font-size:10px;color:#AAA;text-transform:uppercase;letter-spacing:0.08em">${STAGE_LABELS[s]}</span>
+    </div>
+  `).join('') + `
+    <div style="display:flex;align-items:center;gap:6px">
+      <svg width="16" height="5"><circle cx="2" cy="2.5" r="1" fill="#D8D8D8"/><circle cx="8" cy="2.5" r="1" fill="#D8D8D8"/><circle cx="14" cy="2.5" r="1" fill="#D8D8D8"/></svg>
+      <span style="font-size:10px;color:#CCC;text-transform:uppercase;letter-spacing:0.08em">uncharted</span>
+    </div>
+  `;
+}
+
+function renderArcBar(film) {
+  const result = PRELOADED[film.id];
+  const stageBars = STAGES.map(stage => {
+    const s = result.stages[stage];
+    if (!s || !s.present) return '';
+    const opacity = 0.75 + s.intensity * 0.025;
+    return `<div title="${STAGE_LABELS[stage]}: ${s.note}" style="position:absolute;left:${s.start}%;width:${Math.max(s.end - s.start, 3)}%;height:100%;background:${STAGE_COLORS[stage]};opacity:${opacity}"></div>`;
+  }).join('');
+
+  return `
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="width:220px;min-width:220px;text-align:right;font-size:11px;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+        ${film.title}<span style="color:#BBB;margin-left:6px">${film.year}</span>
+      </div>
+      <div style="flex:1;height:20px;background:#F0F0F0;position:relative;border-radius:2px;overflow:hidden">
+        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
+          <defs>
+            <pattern id="gap-${film.id}" x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="0.8" fill="#D8D8D8"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#gap-${film.id})"/>
+        </svg>
+        ${stageBars}
+      </div>
+      <div style="width:200px;min-width:200px;font-size:10px;color:#AAA;line-height:1.3">
+        ${result.framework_order.join(' → ')}
+      </div>
+    </div>
+  `;
+}
+
+function renderDetail(film) {
+  if (!film) return '';
+  const result = PRELOADED[film.id];
+  const stageRows = STAGES.map(stage => {
+    const s = result.stages[stage];
+    const present = s && s.present;
+    return `
+      <div class="stage-row ${present ? '' : 'absent'}">
+        <div style="width:8px;height:8px;min-width:8px;background:${present ? STAGE_COLORS[stage] : '#DDD'};border-radius:50%;margin-top:4px"></div>
+        <div>
+          <div style="font-size:10px;font-weight:600;color:${present ? STAGE_COLORS[stage] : '#CCC'};text-transform:uppercase;letter-spacing:0.08em;margin-bottom:2px">
+            ${STAGE_LABELS[stage]}
+            ${present ? `<span style="color:#BBB;margin-left:8px;text-transform:none;letter-spacing:0;font-weight:400">${s.start}% – ${s.end}% · ${s.intensity}/10</span>` : ''}
+          </div>
+          ${present ? `<div style="font-size:11px;color:#666;line-height:1.6">${s.note}</div>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="detail-panel">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+        <div style="font-weight:600;font-size:16px;color:#1A1A1A">${film.title}</div>
+        <button onclick="closeDetail()" style="background:none;border:none;color:#BBB;font-family:Inter,sans-serif;font-size:11px;cursor:pointer">✕</button>
+      </div>
+      <div style="font-size:11px;color:#AAA;margin-bottom:20px">${film.year} · ${film.genre}</div>
+      <div style="margin-bottom:16px">${stageRows}</div>
+      <div style="border-top:1px solid #EBEBEB;padding-top:14px;font-size:11px;color:#999;font-style:italic;line-height:1.7">${result.deviation_note}</div>
+    </div>
+  `;
+}
+
+function closeDetail() {
+  selectedId = null;
+  render();
+}
+
+function toggleFilm(id) {
+  selectedId = selectedId === id ? null : id;
+  render();
+}
+
+function render() {
+  const selectedFilm = selectedId ? FILMS.find(f => f.id === selectedId) : null;
+
+  const filmRows = FILMS.map(film => `
+    <div class="film-row ${selectedId === film.id ? 'active' : ''}" onclick="toggleFilm(${film.id})">
+      ${renderArcBar(film)}
+    </div>
+  `).join('');
+
+  document.getElementById('app').innerHTML = `
+    <div style="max-width:960px">
+      <div style="margin-bottom:40px;max-width:800px">
+        <div style="font-size:10px;font-weight:600;color:#BBB;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:10px">MFA Thesis Research</div>
+        <div style="font-size:26px;font-weight:600;color:#1A1A1A;line-height:1.3;margin-bottom:12px">
+          Amplification → Excess → Collapse → Blank → New Beginning
+        </div>
+        <div style="font-size:12px;color:#999;line-height:1.8;max-width:540px">
+          20 film narratives coded through a 5-stage framework. New beginning defined as the absence of total dystopian closure — survival and continuation qualify.
+        </div>
+      </div>
+
+      <div style="display:flex;gap:32px;margin-bottom:36px">
+        ${renderStats()}
+      </div>
+
+      <div style="display:flex;gap:20px;margin-bottom:28px;flex-wrap:wrap;align-items:center">
+        ${renderLegend()}
+      </div>
+
+      <div style="margin-bottom:24px">
+        ${filmRows}
+      </div>
+
+      ${selectedFilm ? renderDetail(selectedFilm) : ''}
+    </div>
+  `;
+}
+
+render();
+</script>
+</body>
+</html>
