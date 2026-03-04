@@ -327,9 +327,15 @@ function renderLegend() {
 
 function renderArcBar(film) {
   const result = PRELOADED[film.id];
-  const stageBars = STAGES.map(stage => {
+  // Sort by start position ascending, then by width descending (wider = render first, narrower on top)
+  const presentStages = STAGES.filter(s => result.stages[s] && result.stages[s].present);
+  const sorted = [...presentStages].sort((a, b) => {
+    const sa = result.stages[a], sb = result.stages[b];
+    if (sa.start !== sb.start) return sa.start - sb.start;
+    return (sb.end - sb.start) - (sa.end - sa.start); // wider renders first (behind)
+  });
+  const stageBars = sorted.map(stage => {
     const s = result.stages[stage];
-    if (!s || !s.present) return '';
     const opacity = 0.75 + s.intensity * 0.025;
     return `<div title="${STAGE_LABELS[stage]}: ${s.note}" style="position:absolute;left:${s.start}%;width:${Math.max(s.end - s.start, 3)}%;height:100%;background:${STAGE_COLORS[stage]};opacity:${opacity}"></div>`;
   }).join('');
@@ -355,6 +361,7 @@ function renderArcBar(film) {
       </div>
     </div>
   `;
+
 }
 
 function renderDetail(film) {
