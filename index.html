@@ -131,14 +131,17 @@ const PRELOADED = {
   },
   7: {
     stages: {
-      amplification: { present: true, start: 10, end: 60, intensity: 5, note: "Bob and Charlotte's connection deepens slowly through shared insomnia and quiet conversation." },
+      amplification: { present: true, start: 10, end: 62, intensity: 5, note: "Bob and Charlotte's connection deepens slowly through shared insomnia and quiet conversation." },
       excess: { present: false, start: 0, end: 0, intensity: 0, note: "" },
       collapse: { present: false, start: 0, end: 0, intensity: 0, note: "" },
-      blank: { present: true, start: 0, end: 88, intensity: 7, note: "Tokyo is a sustained blank — alienation and translation failure as permanent condition." },
+      blank: { present: true, start: 0, end: 10, intensity: 7, note: "Tokyo is a sustained blank — alienation and translation failure as permanent condition." },
       "new beginning": { present: true, start: 88, end: 100, intensity: 4, note: "The whispered goodbye suggests something has shifted. Both return to their lives — quietly changed." },
     },
+    extra_bars: [
+      { stage: "blank", start: 62, end: 88, intensity: 7 },
+    ],
     framework_order: ["blank", "amplification", "new beginning"],
-    deviation_note: "Excess and collapse entirely absent. New beginning is a murmur, not a declaration.",
+    deviation_note: "Excess and collapse entirely absent. Blank envelops the film — amplification occurs within it, not after it. New beginning is a murmur, not a declaration.",
   },
   8: {
     stages: {
@@ -339,6 +342,11 @@ function renderArcBar(film) {
     return `<div title="${STAGE_LABELS[stage]}: ${s.note}" style="position:absolute;left:${s.start}%;width:${Math.max(s.end - s.start, 3)}%;height:100%;background:${STAGE_COLORS[stage]};opacity:${opacity};z-index:${i + 1}"></div>`;
   }).join('');
 
+  const extraBars = (result.extra_bars || []).map(b => {
+    const opacity = 0.75 + b.intensity * 0.025;
+    return `<div style="position:absolute;left:${b.start}%;width:${Math.max(b.end - b.start, 3)}%;height:100%;background:${STAGE_COLORS[b.stage]};opacity:${opacity};z-index:1"></div>`;
+  }).join('');
+
   return `
     <div style="display:flex;align-items:center;gap:12px">
       <div style="width:220px;min-width:220px;text-align:right;font-size:11px;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
@@ -353,7 +361,7 @@ function renderArcBar(film) {
           </defs>
           <rect width="100%" height="100%" fill="url(#gap-${film.id})"/>
         </svg>
-        ${stageBars}
+        ${stageBars}${extraBars}
       </div>
       <div style="width:200px;min-width:200px;font-size:10px;color:#AAA;line-height:1.3">
         ${result.framework_order.join(' → ')}
